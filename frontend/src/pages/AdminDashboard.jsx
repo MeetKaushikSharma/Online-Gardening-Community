@@ -64,7 +64,7 @@ const AdminDashboard = () => {
               {activeTab === 'settings' && 'System Settings'}
             </h1>
             <div className="flex items-center space-x-4">
-              <span className="text-muted">Welcome, {user.username}</span>
+              <span className="text-muted">Welcome, {user.name}</span>
             </div>
           </div>
         </header>

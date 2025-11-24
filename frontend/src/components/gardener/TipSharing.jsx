@@ -1,37 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { useForm } from 'react-hook-form';
-import { useAuth } from '../../context/AuthContext';
 
 const TipSharing = () => {
-  const { user } = useAuth();
-  const { tips, fetchTips, addTip } = useStore();
+  const { tips, addTip } = useStore();
   const [showForm, setShowForm] = useState(false);
   const { register, handleSubmit, reset } = useForm();
 
-  useEffect(() => {
-    fetchTips().catch((error) => console.error('Failed to load tips', error));
-  }, [fetchTips]);
-
-  const onSubmit = async (data) => {
-    if (!user?.id) {
-      alert('Please log in again.');
-      return;
-    }
-
-    try {
-      await addTip({
-        title: data.title,
-        description: data.description,
-        userId: user.id
-      });
-      alert('Tip shared successfully!');
-      reset();
-      setShowForm(false);
-      fetchTips();
-    } catch (error) {
-      alert(error.message || 'Unable to share tip');
-    }
+  const onSubmit = (data) => {
+    const newTip = {
+      title: data.title,
+      description: data.description,
+      author: 'Current User',
+      photos: []
+    };
+    
+    addTip(newTip);
+    alert('Tip shared successfully!');
+    reset();
+    setShowForm(false);
   };
 
   return (
@@ -83,18 +70,15 @@ const TipSharing = () => {
             No tips yet. Be the first to share!
           </div>
         ) : (
-          tips.map((tip) => {
-            const createdDate = tip.createdAt ? new Date(tip.createdAt).toLocaleDateString() : 'Just now';
-            return (
-              <div key={tip.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h4 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">{tip.title}</h4>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">{tip.content}</p>
-                <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                  Shared by {tip.authorName || 'Gardener'} on {createdDate}
-                </div>
+          tips.map((tip) => (
+            <div key={tip.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h4 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">{tip.title}</h4>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">{tip.description}</p>
+              <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                Shared by {tip.author} on {new Date(tip.createdAt).toLocaleDateString()}
               </div>
-            );
-          })
+            </div>
+          ))
         )}
       </div>
     </div>

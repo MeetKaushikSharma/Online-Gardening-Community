@@ -1,63 +1,73 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { useForm } from 'react-hook-form';
 
 const UserManagement = () => {
-  const { users, fetchUsers, addUser, updateUser, deleteUser } = useStore();
+  const { users, addUser, updateUser, deleteUser } = useStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit, reset, setValue } = useForm();
 
-  useEffect(() => {
-    fetchUsers().catch((error) => console.error('Failed to load users', error));
-  }, [fetchUsers]);
+  const persistGardenerCredential = (user) => {
+    if (user.role !== 'gardener' || !user.email) return;
+    const existing = localStorage.getItem('gardenerCredentials');
+    const gardeners = existing ? JSON.parse(existing) : [];
 
-  const openModal = (user = null) => {
+    
+    const idx = gardeners.findIndex(g => g.email === user.email);
+    if (idx >= 0) {
+      gardeners[idx] = { ...gardeners[idx], name: user.name, password: user.password || gardeners[idx].password };
+    } else {
+      gardeners.push({ name: user.name, email: user.email, password: user.password || '' });
+    }
+
+    localStorage.setItem('gardenerCredentials', JSON.stringify(gardeners));
+  };
+
+  const removeGardenerCredential = (email) => {
+    if (!email) return;
+    const existing = localStorage.getItem('gardenerCredentials');
+    if (!existing) return;
+    const gardeners = JSON.parse(existing).filter(g => g.email !== email);
+    localStorage.setItem('gardenerCredentials', JSON.stringify(gardeners));
+  };
+
+  const onSubmit = (data) => {
+    
+    const payload = { ...data };
+
+    if (editingUser) {
+      updateUser(editingUser.id, payload);
+  alert('User updated successfully!');
+  if (payload.role === 'gardener') persistGardenerCredential({ ...payload, email: payload.email });
+  if (editingUser.role === 'gardener' && payload.role !== 'gardener') removeGardenerCredential(editingUser.email);
+    } else {
+      addUser(payload);
+      alert('User created successfully!');
+      if (payload.role === 'gardener') persistGardenerCredential(payload);
+    }
+
+    setIsModalOpen(false);
+    reset();
+    setEditingUser(null);
+  };
+
+  const handleEdit = (user) => {
     setEditingUser(user);
-    reset({
-      username: user?.username || '',
-      email: user?.email || '',
-      role: user?.role || 'GARDENER',
-      password: ''
-    });
+    setValue('name', user.name);
+    setValue('email', user.email);
+    setValue('role', user.role);
     setIsModalOpen(true);
   };
 
-  const onSubmit = async (data) => {
-    setSubmitting(true);
-    const payload = {
-      username: data.username,
-      email: data.email,
-      role: data.role,
-      password: data.password
-    };
-
-    try {
-      if (editingUser) {
-        await updateUser(editingUser.id, payload);
-        alert('User updated successfully!');
-      } else {
-        await addUser(payload);
-        alert('User created successfully!');
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      const u = users.find(x => x.id === id);
+      deleteUser(id);
+      if (u && u.role === 'gardener') {
+        removeGardenerCredential(u.email);
       }
-      setIsModalOpen(false);
-      reset();
-      setEditingUser(null);
-    } catch (error) {
-      alert(error.message || 'Unable to save user');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    try {
-      await deleteUser(id);
       alert('User deleted successfully!');
-    } catch (error) {
-      alert(error.message || 'Unable to delete user');
     }
   };
 
@@ -66,7 +76,11 @@ const UserManagement = () => {
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-semibold text-foreground">User Accounts</h2>
         <button
-          onClick={() => openModal()}
+          onClick={() => {
+            setEditingUser(null);
+            reset({ name: '', email: '', role: 'gardener' });
+            setIsModalOpen(true);
+          }}
           className="btn btn-primary btn-accent-green px-4 py-2 rounded"
         >
           Add New User
@@ -77,7 +91,7 @@ const UserManagement = () => {
         <table className="min-w-full">
           <thead className="bg-primary-green/10">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase">Username</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase">Email</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase">Role</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase">Actions</th>
@@ -86,20 +100,18 @@ const UserManagement = () => {
           <tbody className="divide-y divide-border">
             {users.map((user) => (
               <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-foreground">{user.username}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-foreground">{user.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-muted">{user.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 text-xs rounded-full ${
-                    user.role === 'ADMIN'
-                      ? 'bg-accent-coral/20 text-accent-coral'
-                      : 'bg-primary-light/20 text-primary-green'
+                    user.role === 'admin' ? 'bg-accent-coral/20 text-accent-coral' : 'bg-primary-light/20 text-primary-green'
                   }`}>
                     {user.role}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap space-x-2 text-sm">
                   <button
-                    onClick={() => openModal(user)}
+                    onClick={() => handleEdit(user)}
                     className="btn-primary btn-sm"
                   >
                     Edit
@@ -126,11 +138,11 @@ const UserManagement = () => {
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground">Username</label>
+                  <label className="block text-sm font-medium text-foreground">Name</label>
                   <input
-                    {...register('username', { required: true })}
+                    {...register('name', { required: true })}
                     className="form-input mt-1"
-                    placeholder="Enter username"
+                    placeholder="Enter name"
                   />
                 </div>
                 <div>
@@ -148,7 +160,7 @@ const UserManagement = () => {
                     type="password"
                     {...register('password')}
                     className="form-input mt-1"
-                    placeholder={editingUser ? 'Leave blank to keep current password' : 'Set a password'}
+                    placeholder="Set a password (for gardeners)"
                   />
                 </div>
                 <div>
@@ -157,8 +169,8 @@ const UserManagement = () => {
                     {...register('role', { required: true })}
                     className="form-select mt-1"
                   >
-                    <option value="GARDENER">Gardener</option>
-                    <option value="ADMIN">Admin</option>
+                    <option value="gardener">Gardener</option>
+                    <option value="admin">Admin</option>
                   </select>
                 </div>
               </div>
@@ -176,8 +188,7 @@ const UserManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="btn-primary btn-accent-green disabled:opacity-50"
+                  className="btn-primary btn-accent-green"
                 >
                   {editingUser ? 'Update' : 'Create'}
                 </button>

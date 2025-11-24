@@ -1,37 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { useForm } from 'react-hook-form';
-import { useAuth } from '../../context/AuthContext';
 
 const Discussions = () => {
-  const { user } = useAuth();
-  const { discussions, fetchDiscussions, addDiscussion } = useStore();
+  const { discussions, addDiscussion } = useStore();
   const [showForm, setShowForm] = useState(false);
   const { register, handleSubmit, reset } = useForm();
 
-  useEffect(() => {
-    fetchDiscussions().catch((error) => console.error('Failed to load discussions', error));
-  }, [fetchDiscussions]);
-
-  const onSubmit = async (data) => {
-    if (!user?.id) {
-      alert('Please log in again.');
-      return;
-    }
-
-    try {
-      await addDiscussion({
-        topic: data.topic,
-        content: data.content,
-        userId: user.id
-      });
-      alert('Discussion posted successfully!');
-      reset();
-      setShowForm(false);
-      fetchDiscussions();
-    } catch (error) {
-      alert(error.message || 'Unable to post discussion');
-    }
+  const onSubmit = (data) => {
+    addDiscussion({
+      topic: data.topic,
+      content: data.content,
+      author: 'Current User'
+    });
+    alert('Discussion posted successfully!');
+    reset();
+    setShowForm(false);
   };
 
   return (
@@ -78,19 +62,19 @@ const Discussions = () => {
 
       <div className="space-y-4">
         <h3 className="text-xl font-semibold text-foreground">Active Discussions</h3>
-        {discussions.map((discussion) => {
-          const createdDate = discussion.createdAt ? new Date(discussion.createdAt).toLocaleDateString() : 'Just now';
-          return (
-            <div key={discussion.id} className="glass-card p-6">
-              <h4 className="text-lg font-semibold mb-2 text-foreground">{discussion.title}</h4>
-              <p className="text-muted mb-4">{discussion.content}</p>
-              <div className="flex justify-between items-center text-sm text-muted">
-                <span>Posted by {discussion.authorName || 'Gardener'}</span>
-                <span>{createdDate}</span>
+        {discussions.map((discussion) => (
+          <div key={discussion.id} className="glass-card p-6">
+            <h4 className="text-lg font-semibold mb-2 text-foreground">{discussion.topic}</h4>
+            <p className="text-muted mb-4">{discussion.content}</p>
+            <div className="flex justify-between items-center text-sm text-muted">
+              <span>Posted by {discussion.author}</span>
+              <div className="flex items-center space-x-4">
+                <span>💬 {discussion.comments} comments</span>
+                <span>{new Date(discussion.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </div>
   );
