@@ -1,5 +1,9 @@
 package com.gardening;
 
+import com.gardening.dao.CommentDao;
+import com.gardening.dao.PostDao;
+import com.gardening.dao.ProjectDao;
+import com.gardening.dao.UserDao;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -18,12 +22,38 @@ public class GardeningCommunityApplication {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
+                if (allowedOrigins == null || allowedOrigins.isEmpty()) {
+                    // Default to localhost for development
+                    allowedOrigins = "http://localhost:5173,http://localhost:3000";
+                }
+
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:5173", "http://localhost:3000")
+                        .allowedOrigins(allowedOrigins.split(","))
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
         };
+    }
+
+    @Bean
+    public UserDao userDao() {
+        return new UserDao();
+    }
+
+    @Bean
+    public PostDao postDao() {
+        return new PostDao();
+    }
+
+    @Bean
+    public CommentDao commentDao() {
+        return new CommentDao();
+    }
+
+    @Bean
+    public ProjectDao projectDao() {
+        return new ProjectDao();
     }
 }

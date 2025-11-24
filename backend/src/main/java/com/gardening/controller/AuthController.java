@@ -1,79 +1,110 @@
 package com.gardening.controller;
 
+import com.gardening.dao.UserDao;
 import com.gardening.dto.ApiResponse;
 import com.gardening.dto.LoginRequest;
 import com.gardening.dto.RegisterRequest;
 import com.gardening.entity.User;
-import com.gardening.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.gardening.util.PasswordUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.sql.SQLException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserDao userDao;
 
-    // Hardcoded admin credentials
-    private static final String ADMIN_EMAIL = "admin";
-    private static final String ADMIN_PASSWORD = "admin123@";
+    public AuthController(UserDao userDao) {
+        this.userDao = userDao;
+    }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<?>> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<User>> login(@RequestBody LoginRequest request) {
         try {
-            if ("admin".equals(request.getUserType())) {
-                // Admin login
-                if (ADMIN_EMAIL.equals(request.getEmail()) && ADMIN_PASSWORD.equals(request.getPassword())) {
-                    User adminUser = new User();
-                    adminUser.setId(1);
-                    adminUser.setName("Admin User");
-                    adminUser.setEmail("admin");
-                    adminUser.setRole("admin");
-
-                    ApiResponse<User> response = new ApiResponse<>(true, "Login successful");
-                    response.setData(adminUser);
-                    return ResponseEntity.ok(response);
-                } else {
-                    return ResponseEntity.ok(new ApiResponse<>(false, "Invalid admin credentials"));
-                }
-            } else if ("gardener".equals(request.getUserType())) {
-                // Gardener login
-                User user = userRepository.findByEmailAndPassword(request.getEmail(), request.getPassword());
-                if (user != null) {
-                    ApiResponse<User> response = new ApiResponse<>(true, "Login successful");
-                    response.setData(user);
-                    return ResponseEntity.ok(response);
-                } else {
-                    return ResponseEntity.ok(new ApiResponse<>(false, "Invalid gardener credentials"));
-                }
+            // Handle admin login (hardcoded for now)
+            if ("admin".equals(request.getEmail()) && "admin123@".equals(request.getPassword())) {
+                User adminUser = new User();
+                adminUser.setId(1);
+                adminUser.setUsername("admin");
+                adminUser.setEmail("admin");
+                adminUser.setRole("ADMIN");
+                sanitize(adminUser);
+                ApiResponse<User> response = new ApiResponse<>(true, "Login successful");
+                response.setData(adminUser);
+                return ResponseEntity.ok(response);
             }
-            return ResponseEntity.ok(new ApiResponse<>(false, "Invalid user type"));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new ApiResponse<>(false, "Login failed: " + e.getMessage()));
+
+            // Handle regular user login
+            Optional<User> userOpt = userDao.getUserByEmail(request.getEmail());
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse<>(false, "Invalid credentials"));
+            }
+
+            User user = userOpt.get();
+            if (!PasswordUtil.matches(request.getPassword(), user.getPasswordHash())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse<>(false, "Invalid credentials"));
+            }
+
+            // Ensure role is uppercase for consistency
+            if (user.getRole() != null) {
+                user.setRole(user.getRole().toUpperCase());
+            }
+
+            sanitize(user);
+            ApiResponse<User> response = new ApiResponse<>(true, "Login successful");
+            response.setData(user);
+            return ResponseEntity.ok(response);
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Login failed: " + e.getMessage()));
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<User>> register(@RequestBody RegisterRequest request) {
         try {
-            // Check if email already exists
-            if (userRepository.findByEmail(request.getEmail()) != null) {
-                return ResponseEntity.ok(new ApiResponse<>(false, "Email already registered"));
+            if (userDao.getUserByEmail(request.getEmail()).isPresent()) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>(false, "Email already registered"));
             }
 
-            // Create new gardener user
-            User user = new User();
-            user.setName(request.getName());
-            user.setEmail(request.getEmail());
-            user.setPassword(request.getPassword());
-            user.setRole("gardener");
+            if (userDao.getUserByUsername(request.getUsername()).isPresent()) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse<>(false, "Username already taken"));
+            }
 
-            userRepository.save(user);
-            return ResponseEntity.ok(new ApiResponse<>(true, "Registration successful! Please login."));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new ApiResponse<>(false, "Registration failed: " + e.getMessage()));
+            User user = new User();
+            user.setUsername(request.getUsername());
+            user.setEmail(request.getEmail());
+            user.setPasswordHash(PasswordUtil.hashPassword(request.getPassword()));
+            user.setRole("GARDENER");
+
+            int id = userDao.createUser(user);
+            user.setId(id);
+            // Ensure role is uppercase
+            user.setRole("GARDENER");
+            sanitize(user);
+
+            ApiResponse<User> response = new ApiResponse<>(true, "Registration successful");
+            response.setData(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ApiResponse<>(false, "Registration failed: " + e.getMessage()));
         }
+    }
+
+    private void sanitize(User user) {
+        user.setPasswordHash(null);
     }
 }

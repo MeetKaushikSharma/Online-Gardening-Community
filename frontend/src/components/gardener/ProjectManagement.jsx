@@ -1,26 +1,53 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { useForm } from 'react-hook-form';
+import { useAuth } from '../../context/AuthContext';
 
 const ProjectManagement = () => {
-  const { projects, addProject, updateProject } = useStore();
+  const { user } = useAuth();
+  const { projects, fetchProjects, addProject, updateProject } = useStore();
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
-  const { register, handleSubmit, reset, setValue, watch } = useForm();
+  const { register, handleSubmit, reset, setValue, watch } = useForm({
+    defaultValues: { progress: 0 }
+  });
 
-  const progressValue = watch('progress', 0);
+  const progressValue = Number(watch('progress', 0)) || 0;
 
-  const onSubmit = (data) => {
-    if (editingProject) {
-      updateProject(editingProject.id, data);
-      alert('Project updated successfully!');
-    } else {
-      addProject(data);
-      alert('Project created successfully!');
+  useEffect(() => {
+    if (user?.id) {
+      fetchProjects(user.id).catch((error) => console.error('Failed to load projects', error));
     }
-    reset();
-    setShowForm(false);
-    setEditingProject(null);
+  }, [fetchProjects, user]);
+
+  const onSubmit = async (data) => {
+    if (!user?.id) {
+      alert('Please log in again.');
+      return;
+    }
+
+    const payload = {
+      userId: user.id,
+      name: data.name,
+      description: data.description,
+      progress: Number(data.progress || 0)
+    };
+
+    try {
+      if (editingProject) {
+        await updateProject(editingProject.id, payload);
+        alert('Project updated successfully!');
+      } else {
+        await addProject(payload);
+        alert('Project created successfully!');
+      }
+      reset();
+      setShowForm(false);
+      setEditingProject(null);
+      fetchProjects(user.id);
+    } catch (error) {
+      alert(error.message || 'Unable to save project');
+    }
   };
 
   const handleEdit = (project) => {
@@ -75,10 +102,9 @@ const ProjectManagement = () => {
               </label>
               <input
                 type="range"
-                {...register('progress')}
+                {...register('progress', { valueAsNumber: true })}
                 min="0"
                 max="100"
-                defaultValue="0"
                 className="w-full accent-green"
               />
             </div>

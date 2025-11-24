@@ -1,43 +1,29 @@
 package com.gardening.entity;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
-@Entity
-@Table(name = "projects")
 public class Project {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(nullable = false, length = 255)
+    private int id;
+    private int userId;
     private String name;
-
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String description;
+    private int progress;
+    private Timestamp createdAt;
 
-    @Column(name = "user_id")
-    private Integer userId;
-
-    @Column(nullable = false)
-    private Integer progress = 0;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
-
-    // Getters and Setters
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getName() {
@@ -56,27 +42,19 @@ public class Project {
         this.description = description;
     }
 
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public Integer getProgress() {
+    public int getProgress() {
         return progress;
     }
 
-    public void setProgress(Integer progress) {
+    public void setProgress(int progress) {
         this.progress = progress;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 }

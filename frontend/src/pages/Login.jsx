@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
 
 const Login = () => {
   const { login, register: registerUser } = useAuth();
@@ -11,7 +10,7 @@ const Login = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
   const onSubmit = async (data) => {
-    const result = await login(data.email, data.password, rememberMe, userType);
+    const result = await login(data.email, data.password, rememberMe);
     if (!result.success) {
       alert(result.error);
     }
@@ -24,7 +23,7 @@ const Login = () => {
       return;
     }
 
-    const res = await registerUser(data.name, data.email, data.password);
+    const res = await registerUser(data.username, data.email, data.password);
     if (res.success) {
       alert(res.message);
       setIsRegistering(false);
@@ -70,7 +69,11 @@ const Login = () => {
           <>
             <div className="flex items-center justify-between mb-4">
               <button
-                onClick={() => setUserType(null)}
+                onClick={() => {
+                  setUserType(null);
+                  setIsRegistering(false);
+                  reset();
+                }}
                 className="text-muted hover:text-foreground flex items-center gap-2"
               >
                 <span>←</span>
@@ -96,9 +99,9 @@ const Login = () => {
             {!isRegistering ? (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <label className="form-label">Email / Username</label>
+                <label className="form-label">Email</label>
                 <input
-                  type="text"
+                  type="email"
                   {...register('email', { required: 'Email is required' })}
                   className="form-input"
                   placeholder="Enter your email"
@@ -143,11 +146,11 @@ const Login = () => {
             ) : (
               <form onSubmit={handleSubmit(onRegister)} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Full Name</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Username</label>
                   <input
-                    {...register('name', { required: 'Name is required' })}
+                    {...register('username', { required: 'Username is required' })}
                     className="w-full border border-gray-300 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                    placeholder="Enter your full name"
+                    placeholder="Enter your username"
                   />
                 </div>
                 <div>

@@ -57,7 +57,7 @@ const GardenerDashboard = () => {
               {activeTab === 'projects' && 'My Gardening Projects'}
             </h1>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-600 dark:text-gray-300">Welcome, {user.name}</span>
+              <span className="text-gray-600 dark:text-gray-300">Welcome, {user.username}</span>
             </div>
           </div>
         </header>

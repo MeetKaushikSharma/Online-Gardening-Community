@@ -1,0 +1,2 @@
+web: java -jar target/gardening-community-1.0.0.jar
+

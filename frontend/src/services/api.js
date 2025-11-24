@@ -11,8 +11,23 @@ export async function apiFetch(path, opts = {}) {
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || res.statusText);
+    let message = res.statusText;
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      try {
+        const body = await res.json();
+        message = body?.message || message;
+        throw new Error(message);
+      } catch (error) {
+        throw new Error(message);
+      }
+    } else {
+      const text = await res.text();
+      if (text) {
+        message = text;
+      }
+      throw new Error(message);
+    }
   }
 
   const contentType = res.headers.get("content-type") || "";

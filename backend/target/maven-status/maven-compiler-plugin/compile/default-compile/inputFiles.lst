@@ -1,21 +1,24 @@
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\entity\Discussion.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\entity\User.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\controller\ProjectController.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\GardeningCommunityApplication.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\controller\AuthController.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\entity\Setting.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\dto\ApiResponse.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\repository\ProjectRepository.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\repository\SettingRepository.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\repository\TipRepository.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\controller\DiscussionController.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\entity\Project.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\repository\DiscussionRepository.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\controller\UserController.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\dto\RegisterRequest.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\controller\TipController.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\entity\PendingContent.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\entity\Tip.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\dto\LoginRequest.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\repository\PendingContentRepository.java
-C:\Users\sharm\Videos\MY DOCUMENTS\gardening-community\backend\src\main\java\com\gardening\repository\UserRepository.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dto\ProjectRequest.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\GardeningCommunityApplication.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\util\PasswordUtil.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dto\CommentRequest.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\controller\PostController.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dto\RegisterRequest.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\entity\Post.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\controller\ProjectController.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dto\PostRequest.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\controller\AuthController.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dto\ApiResponse.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\controller\UserController.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\entity\Project.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dto\UserRequest.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dao\PostDao.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\db\DatabaseConnection.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\entity\User.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\controller\CommentController.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dao\UserDao.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dto\LoginRequest.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dao\CommentDao.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\db\DatabaseInitializer.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\dao\ProjectDao.java
+C:\Users\sharm\Videos\gardening-community\backend\src\main\java\com\gardening\entity\Comment.java
